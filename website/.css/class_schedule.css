@@ -1,0 +1,28 @@
+table {
+    border-collapse: collapse;
+    border-color: black;
+    font-family:  "微軟正黑體", sans-serif, monospace;
+    background-image: url("../images/fcu-logo.png");
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    text-align: center;
+    width: 100%;
+    columns: 150px;
+    table-layout: fixed;
+}
+
+caption{
+    font-size: 2em;
+}
+th {
+    background-color: gray;
+    color: white;
+}
+
+
+.tired {
+    background-color: linen;
+}
+#Web程式設計{
+    font-weight: bold; 
+}

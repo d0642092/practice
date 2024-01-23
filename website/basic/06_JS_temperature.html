@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+
+</head>
+
+<body>
+
+    <div class="container">
+        <form action="/action_page.php">
+            <div class="form-group row">
+                <div class="col-md-8 col-12">
+                    <label id="num">Temperature:</label>
+                    <input type="text" class="form-control" id="degree">
+                </div>
+                <div class="col-md-4 col-12">
+                    <label>Convert To:</label>
+                    <select class="form-control" id="Temperature">
+                        <option>Fahrenheit</option>
+                        <option>Celsius</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Result:</label>
+                <input type="text" class="form-control" id="Result" readonly>
+            </div>
+            <button type="button" onclick="check()"> Convert </button>
+            <button type="button" onclick="Reset()"> Reset </button>
+            <script>
+                function check() {
+                    if (document.getElementById("degree").value == 0) {
+                        if (document.getElementById("num").style.backgroundColor == "yellow") {
+                            return;
+                        }
+                        document.getElementById("num").innerHTML += "(Please input a number)";
+                        document.getElementById("num").style.backgroundColor = "yellow";
+                    }
+                    else {
+                        document.getElementById("num").innerHTML = "Temperature:";
+                        document.getElementById("num").style.backgroundColor = "white";
+                        convert();
+                    }
+                }
+                function convert() {
+                    var sum;
+                    var type = document.getElementById("Temperature").value;
+                    if (type == "Celsius") {
+                        sum = (document.getElementById("degree").value - 32) * 5 / 9;
+                        document.getElementById("Result").value = sum.toFixed(2);
+                    }
+                    else {
+                        sum = (document.getElementById("degree").value * 9 / 5) + 32;
+                        document.getElementById("Result").value = sum.toFixed(2);
+                    }
+                }
+                function Reset() {
+                    document.getElementById("degree").value = null;
+                    document.getElementById("Result").value = null;
+                }
+            </script>
+
+        </form>
+    </div>
+
+</body>
+
+</html>

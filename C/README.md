@@ -45,28 +45,28 @@ weight path, and the second line is the cost of a minimal path. The path consist
 (separated by one or more spaces) representing the rows that constitute the minimal path. If there is more than 
 one path of minimal weight the path that is lexicographically smallest should be output. 
 Note: Lexicographically means the natural order on sequences induced by the order on their elements. 
-### Sample Input 
-5 6 
-3 4 1 2 8 6 
-6 1 8 2 7 4 
-5 9 3 9 9 5 
-8 4 1 3 2 6 
-3 7 2 8 6 4 
-5 6 
-3 4 1 2 8 6 
-6 1 8 2 7 4 
-5 9 3 9 9 5 
-8 4 1 3 2 6 
-3 7 2 1 2 3 
-2 2 
-9 10 9 10 
-### Sample Output 
-1 2 3 4 4 5 
-16 
-1 2 1 5 4 5 
-11 
-1 1 
-19 
+### Sample Input  
+5 6  
+3 4 1 2 8 6   
+6 1 8 2 7 4  
+5 9 3 9 9 5  
+8 4 1 3 2 6  
+3 7 2 8 6 4  
+5 6  
+3 4 1 2 8 6  
+6 1 8 2 7 4  
+5 9 3 9 9 5  
+8 4 1 3 2 6  
+3 7 2 1 2 3  
+2 2  
+9 10 9 10  
+### Sample Output  
+1 2 3 4 4 5  
+16  
+1 2 1 5 4 5  
+11  
+1 1  
+19  
 
 ## Minimum number of sprinklers 
 `(number_of_sprinklers.c)`

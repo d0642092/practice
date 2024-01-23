@@ -1,0 +1,16 @@
+# C
+C/doc
+C/exe
+
+# java
+*.docx
+
+operation_socket
+
+# python
+python/data/CiFar10
+python/data/Mnist
+python/result
+
+# swift
+__MACOSX/

@@ -1,0 +1,198 @@
+---
+title: "特徵值程式碼"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+library(pls)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 讀檔
+```{r echo=FALSE}
+PWD <- "../Data/"
+EXCEL <- dir(PWD)
+FL_Ques<-EXCEL[grep("^Q._|xlsx&",EXCEL)]
+FL_quiz<-EXCEL[grep("^quiz|xlsx&",EXCEL)]
+FL_HW <-EXCEL[grep("^hw|xlsx&",EXCEL)]
+FL_attend<-EXCEL[grep("^insurance_|xlsx&",EXCEL)]
+RES_quiz <- read_excel(paste0(PWD,FL_quiz[1]))
+RES_quiz2<-read_excel(paste0(PWD,FL_quiz[2]))
+RES_quiz3<-read_excel(paste0(PWD,FL_quiz[3]))
+RES_Q1 <- read_excel(paste0(PWD, FL_Ques[1]))
+RES_Q2<-read_excel(paste0(PWD,FL_Ques[2]))
+#小考
+  for( colname in colnames(RES_quiz)[-1]){
+    RES_quiz[[colname]]<-as.numeric(gsub("NA",0,RES_quiz[[colname]]))
+  }
+  rm(colname)
+  for( colname in colnames(RES_quiz2)[-1]){
+    RES_quiz2[[colname]]<-as.numeric(gsub("NA",0,RES_quiz2[[colname]]))
+  }
+  rm(colname)
+  for( colname in colnames(RES_quiz3)[-1]){
+    RES_quiz3[[colname]]<-as.numeric(gsub("NA",0,RES_quiz3[[colname]]))
+  }
+  rm(colname)
+
+
+# 作業
+  for (file_name in FL_HW){
+    FR <- read_excel(paste0(PWD ,file_name))
+    FR[[2]][which(FR[c(2)]=="NA")] <- 0
+    if(file_name==FL_HW[1]){
+      DT_HW<-data.frame("ID"=FR$ID)
+    }
+    DT_HW<-merge(DT_HW,FR, by="ID")
+    rm(FR,file_name)
+  }
+# 目標
+FL_grade<-EXCEL[grep("^grade_|xlsx&",EXCEL)]
+RES_grade <- read_excel(paste0(PWD,FL_grade))
+DT_semester <- cbind(RES_grade$ID, RES_grade$semester_grade)
+DT_semester <- as.data.frame(DT_semester)
+names(DT_semester)<-c("ID","semester_grade")
+```
+```{r echo=TRUE}
+  EXCEL
+```
+## 特徵值定義及算法
+
+### 是否有興趣(Q1 V7_2或V7_3為1)
+```{r STE_interest, echo=TRUE}
+  STE_interest<-data.frame("ID"=RES_Q1$ID,"interest"=0)
+  STE_interest[which(RES_Q1$Q1V7_2 == 1 | RES_Q1$Q1V7_3 == 1),2]<-1
+  head(STE_interest)
+```
+
+### 不認真程度(Q2 V2,V4,V6加總平均)
+```{r DT_notSerious, echo=FALSE}
+  DT_notSerious <- as.data.frame(cbind(RES_Q2$Q2V2 , RES_Q2$Q2V4, RES_Q2$Q2V6))
+  names(DT_notSerious)<-c("Q2","Q4","Q6")
+  DT_notSerious$Q2<-as.numeric(DT_notSerious$Q2)
+  DT_notSerious$Q4<-as.numeric(DT_notSerious$Q4)
+  DT_notSerious$Q6<-as.numeric(DT_notSerious$Q6)
+```
+```{r STE_notSerious, echo=TRUE}
+  STE_notSerious<-as.data.frame(cbind(RES_Q2$ID,rowSums(DT_notSerious)/3))
+  names(STE_notSerious)<-c("ID","STE_notSerious")
+  STE_notSerious$STE_notSerious <- as.numeric(STE_notSerious$STE_notSerious)
+  head(STE_notSerious)
+```
+### 認真程度(Q2 V8,V9加總平均)
+```{r DT_Serious, echo=FALSE}
+  DT_Serious <- as.data.frame(cbind(RES_Q2$Q2V8 , RES_Q2$Q2V9))
+  names(DT_Serious)<-c("Q8","Q9")
+  DT_Serious$Q9[which(DT_Serious$Q9=="NA")]<-0
+  DT_Serious$Q8<-as.numeric(DT_Serious$Q8)
+  DT_Serious$Q9<-as.numeric(DT_Serious$Q9)
+  
+```
+```{r STE_Serious, echo=TRUE}
+  STE_Serious<-as.data.frame(cbind(RES_Q2$ID,rowSums(DT_Serious)/2))
+  names(STE_Serious)<-c("ID","STE_Serious")
+  STE_Serious$STE_Serious <- as.numeric(STE_Serious$STE_Serious)
+  head(STE_Serious)
+```
+### 上課專注度(認真/(認真+不認真))
+```{r STE_forcus, echo=TRUE}
+  STE_forcus <- data.frame("ID"=RES_Q2$ID,"STE_forcus"=0)
+  STE_forcus$STE_forcus<-as.numeric(STE_Serious$STE_Serious)/as.numeric(STE_Serious$STE_Serious)+as.numeric(STE_notSerious$STE_notSerious)
+  head(STE_forcus)
+```
+### 書本狀況(二進位表達, Q2v12 (1010 => 10))
+```{r DT_Book, echo=FALSE}
+  DT_Book <- as.data.frame(cbind(RES_Q2$Q2V12_1, RES_Q2$Q2V12_2, RES_Q2$Q2V12_3, RES_Q2$Q2V12_4))
+```
+```{r STE_Book, echo=TRUE}
+  STE_Book<-as.data.frame(cbind(RES_Q2$ID,colSums(t(DT_Book)* c(8,4,2,1))))
+  names(STE_Book)<-c("ID","STE_Book")
+  STE_Book$STE_Book <- as.numeric(STE_Book$STE_Book)
+  head(STE_Book)
+```
+### 出席(STE_attend(每日正課出席狀況二進位))
+```{r STE_attend, echo=TRUE}
+for (file_name in FL_attend){
+  FR <- read_excel(paste0(PWD ,file_name))
+  FR[which(FR[c(2)]>=2)%%dim(FR)[1],c(2)]<-0
+  FR[which(FR[c(3)]>=2)%%dim(FR)[1],c(3)]<-0
+  FR[which(FR[c(4)]>=2)%%dim(FR)[1],c(4)]<-0
+  FR[which(FR[c(5)]>=2)%%dim(FR)[1], c(5)]<-0
+  if(file_name==FL_attend[1]){
+    DT_allAttend<-data.frame("ID"=FR$ID)
+    DT_experiment<-data.frame("ID"=FR$ID)
+    STE_attend<-data.frame("ID"=FR$ID)
+  }
+  DT_allAttend<-merge(DT_allAttend,FR, by="ID")
+  DT_experiment<-merge(DT_experiment,FR[c(1,5)], by="ID")
+  STE_attend<-cbind(STE_attend, colSums(t(FR[c(2,3,4)])* c(4,2,1)))
+  rm(FR,file_name)
+}
+names(STE_attend)<-c("ID",paste0("v",c(1:10)))
+
+
+```
+### 基本(總出席率(含實習),實習出席率,作業繳交次數,小考總分)
+```{r basic, echo=FALSE}
+  #總出席率(含實習)
+    PER_allAttend <- data.frame("ID"=DT_allAttend$ID,"allAttend"=0)
+  #實習出席率
+    PER_experiment <- data.frame("ID"=DT_experiment$ID,"PER_EX"=0)
+  #作業繳交次數
+    SUM_HW <- data.frame("ID"=DT_HW$ID,"SUM_HW"=0)
+  #小考總分
+    SUM_quiz1 <- data.frame("ID"=RES_quiz$ID,"quiz1"=0)
+    SUM_quiz2 <- data.frame("ID"=RES_quiz2$ID,"quiz2"=0)
+    SUM_quiz3 <- data.frame("ID"=RES_quiz3$ID,"quiz3"=0)
+  for (i in 1:dim(DT_allAttend)[1]){
+    PER_allAttend$allAttend[i]<-mean(as.numeric(DT_allAttend[i,-1]))
+    PER_experiment$PER_EX[i]<-mean(as.numeric(DT_experiment[i,-1]))
+    SUM_HW$SUM_HW[i]<-sum(as.numeric(DT_HW[i,-1]))
+    SUM_quiz1$quiz1[i]<-sum(as.numeric(RES_quiz[i,-1]))
+    SUM_quiz2$quiz2[i]<-sum(as.numeric(RES_quiz2[i,-1]))
+    SUM_quiz3$quiz3[i]<-sum(as.numeric(RES_quiz3[i,-1]))
+  }
+```
+```{r showBasic, echo=TRUE}
+  head(PER_allAttend)
+  head(PER_experiment)
+  head(SUM_HW)
+  head(SUM_quiz1)
+  head(SUM_quiz2)
+  View(RES_quiz2)
+```
+## 建模
+```{r merge ,echo=TRUE}
+  MER_data <- merge(RES_quiz, RES_quiz2,by="ID")
+  MER_data <- merge(MER_data, RES_quiz3,by="ID")
+  MER_data <- merge(MER_data, STE_attend,by="ID")
+  MER_data <- merge(MER_data, DT_semester,by="ID")
+  head(MER_data)
+```
+```{r train ,echo=FALSE}
+  IDtest <- list( "D0025361","D0036251", "D0062728", "D0079729", "D0079937","D0229859", "D0229982", "D0230097", "D0230201", "D0230317","D0230470", "D0269263", "D0275878", "D0275953", "D0276007","D0391809", "D9979704")
+  
+  data.test <- data[which(data$ID == "D0025361"),]
+  for( i in IDtest){
+    if( i == "D0025361"){
+      next
+    }
+    data.test <- rbind(data.test, data[which(data$ID == i),])
+  }
+  data.train <- data
+  
+  for( i in IDtest){
+    data.train<-data.train[-which(data.train$ID==i),]
+  }
+  rm(i)
+  pcr_model <- pcr(data.train$semester_grade~., data = data.train[-c(1,dim(data.train)[2])],scale=TRUE)
+  pcr_pred <- predict(pcr_model, data.test, ncomp = 1)
+```
+```{r showTrain, echo=TRUE}
+  summary(pcr_model)
+  mean((pcr_pred - as.numeric(data.test$semester_grade))^2)
+```

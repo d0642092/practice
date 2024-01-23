@@ -1,0 +1,175 @@
+---
+title: "期初預賽"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+# 數據準備
+## 學期成績
+```{r fig.width=7.3, fig.height=5}
+PWD = "../data/"
+EXCEL <- dir(PWD)
+# 抓取目標(學習成績)
+FL_grade<-EXCEL[grep("^grade_|xlsx&",EXCEL)]
+RES_grade <- read_excel(paste0(PWD,FL_grade))
+DT_semester <- cbind(RES_grade$ID, RES_grade$semester_grade)
+DT_semester <- as.data.frame(DT_semester)
+names(DT_semester)<-c("ID","semester_grade")
+
+```
+
+
+## 問卷
+```{r fig.width=7.3, fig.height=5}
+FL_Ques<-EXCEL[grep("^Q._|xlsx&",EXCEL)]
+RES_Q1 <- read_excel(paste0(PWD, FL_Ques[1]))
+
+STE_interest<-data.frame("ID"=RES_Q1$ID,"interest"=0)
+STE_interest[which(RES_Q1$Q1V7_2 == 1 | RES_Q1$Q1V7_3 == 1),2]<-1
+STE_rebuild <-data.frame("ID"=RES_Q1$ID,"Rebuild"=RES_Q1$Q1V9)
+```
+
+
+## 出席數據處理
+```{r fig.width=7.3, fig.height=5}
+FL_attend<-EXCEL[grep("^insurance_|xlsx&",EXCEL)]
+DT_allAttend <- read_excel(paste0(PWD,FL_attend[1]))
+for (file_name in FL_attend[-1]){
+  DT_allAttend<-merge(DT_allAttend,read_excel(paste0(PWD,file_name)),by = "ID")
+}
+
+for (i in 2:dim(DT_allAttend)[2]){
+  DT_allAttend[[i]][which(DT_allAttend[[i]]>=2)]<-0
+}
+
+a <-array()
+for (i in 1:dim(DT_allAttend)[1]){
+  a<-append(a,sum(as.numeric(DT_allAttend[i,][-1]))/(dim(DT_allAttend)[2]-1))
+}
+a<-a[-1]
+
+PER_allAttend <- data.frame("ID"=DT_allAttend$ID,
+                             "allAttend"=a)
+rm(file_name,i,a)
+```
+
+
+## 作業數據
+```{r fig.width=7.3, fig.height=5}
+FL_HW <-EXCEL[grep("^hw|xlsx&",EXCEL)]
+DT_HW <- read_excel(paste0(PWD,FL_HW[1]))
+
+for (file_name in FL_HW[-1]){
+  tmp <- read_excel(paste0(PWD,file_name))
+  if(length(which(tmp[c(2)]=="NA"))>0){
+    tmp[which(tmp[c(2)]=="NA")%%dim(tmp)[1],c(2)]<-"0"
+    tmp[[2]]<-as.numeric(tmp[[2]])
+  }
+  DT_HW<-merge(DT_HW, tmp, by = "ID")
+}
+
+a <-array()
+for (i in 1:dim(DT_HW)[1]){
+  a<-append(a,sum(as.numeric(DT_HW[i,][-1])))
+}
+a<-a[-1]
+
+SUM_HW <- data.frame("ID"=DT_HW$ID,
+                      "SUM_HW"=a)
+rm(file_name, a)
+
+```
+
+## 小考1數據
+```{r fig.width=7.3, fig.height=5}
+FL_quiz <-EXCEL[grep("^quiz|xlsx&",EXCEL)]
+RES_quiz <- read_excel(paste0("../data/",FL_quiz[1]))
+for (i in 2:dim(RES_quiz)[2]){
+  RES_quiz[[i]][which(RES_quiz[[i]]=="NA")]<- 0
+}
+a <-array()
+for (i in 1:dim(RES_quiz)[1]){
+  a<-append(a,sum(as.numeric(RES_quiz[i,][-1])))
+}
+a<-a[-1]
+SUM_quiz1 <- data.frame("ID"=RES_quiz$ID,
+                    "quiz1"=a)
+rm(i,a)
+```
+
+## 資料合併
+```{r fig.width=7.3, fig.height=5}
+MER_data <- merge(SUM_quiz1, CON_quiz,by="ID")
+MER_data <- merge(MER_data, SUM_HW,by="ID")
+MER_data <- merge(MER_data, STE_interest,by="ID")
+MER_data <- merge(MER_data, STE_rebuild,by="ID")
+MER_data <- merge(MER_data, STE_Book,by="ID")
+MER_data <- merge(MER_data, STE_attend,by="ID")
+MER_data <- merge(MER_data, STE_forcus,by="ID")
+MER_data <- merge(MER_data, PER_experiment,by="ID")
+MER_data <- merge(MER_data, DT_semester,by="ID")
+#CON_quiz 34
+MER_data <- merge(CON_quiz, DT_semester,by="ID")
+#MER_data <- merge(MER_data, PER_allAttend,by="ID")
+#MER_data <- merge(MER_data, STE_notSerious,by="ID")
+#MER_data <- merge(MER_data, STE_Serious,by="ID")
+```
+
+# 訓練
+## 切割資料
+
+You can also embed plots, for example:
+
+```{r fig.width=7.3, fig.height=5}
+IDtest <- list( "D0025361","D0036251", "D0062728", "D0079729", "D0079937","D0229859", "D0229982", "D0230097", "D0230201", "D0230317","D0230470", "D0269263", "D0275878", "D0275953", "D0276007","D0391809", "D9979704")
+
+data.test <- MER_data[which(MER_data$ID == "D0025361"),]
+for( i in IDtest){
+  if( i == "D0025361"){
+    next
+  }
+  data.test <- rbind(data.test, MER_data[which(MER_data$ID == i),])
+}
+dim(data.test)
+data.train <- MER_data
+
+for( i in IDtest){
+  data.train<-data.train[-which(data.train$ID==i),]
+}
+rm(i)
+dim(data.train)
+
+```
+## 模型訓練
+```{r fig.width=7.3, fig.height=5}
+for (i in colnames(data)[-dim(data)[2]]){
+  dataML <- as.formula(paste(colnames(data)[dim(data)[2]],"~",
+                             paste(colnames(data)[-c(1,dim(data)[2])],
+                                   collapse = "+")))
+}
+m1<-lm(dataML, data=data.train)
+summary(m1)
+View(MER_data)
+result<-predict(m1, newdata = data.test[-c(1,dim(data.test)[2])])
+#saveRDS(object = result, file = "蔡承儒_王泓文_陳致維_余淳芳.rds")
+result <- cbind(result, as.numeric(data.test[[dim(data.test)[2]]]))
+result <- as.data.frame(result)
+names(result) <- c("預測","實際")
+mean((result$實際-result$預測)^2)
+View(result)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

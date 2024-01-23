@@ -1,0 +1,148 @@
+---
+title: "第二次雙週作業的解答"
+author: "王泓文"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 注意事項：
+1. 每一個人的題目都是十題加三題，請自行前往班級的「LMS」網站讀取題目。至於每一個人是面對哪三個解釋變數，就交給上天決定，完全隨機。
+1. 請把「第三行」的作者名字換掉，當然是換成你的全名。
+1. 答題需要的套件，請加在第12行跟第14行之間的「R chunk」。
+1. <span style="color: blue;">這一點非常重要：請自行把真正的題目加進來，比如說，第一題是「xyz」就把「(第一題)的解答」變成「(第一題)xyz的解答」或是其他更寫意的句子，雖然這不算分數，但是沒出現真正題目，一定沒分數。</span>
+1. 第五題跟第十題是「解讀題」，要求各位解釋(小作文)每一題答案的數字，這是「R程式碼」之外的另一個重點，一定要持續練習、一定要上網搜救(求救)一般人是如何解讀的？
+1. <span style="color: red;">因應今年疫情期間，為了督促各位即時、及時完成「分組期末比賽」，特別設計「比賽進度題」，請根據個人、個人學習生態圈，以及師長的要求，自行設計相關題目**三題**並解答。每一次的相關進度「實踐度」將列入「個人期末比賽書面報告」的評分項目，師長個人相信這絕對是關鍵項目。</span>
+1. 期限內上傳作業成果時，務必把「作業樣板檔案名稱」從「HWoo.Rmd」改成「xxx的第oo次雙週作業.Rmd」或是「xxx的第oo次單週作業.Rmd」(上傳時才改成中文名稱的「.Rmd」)。其中「xxx」是你的大名，當然如果你是「單名」，那就是「xx的第oo次雙週作業.Rmd」或是「xx的第oo次單週作業.Rmd」。
+1. 請按時繳交每一次師長安排的課外作業，萬不得已不開啟補交頁面。請不要試圖寄信給師長或是助教，希望能夠補交作業，一律拒收。
+
+# 準備數據
+
+```{r fig.width=7.3, fig.height=5}
+grade <- read_excel(paste0("D:\\Code\\R\\grade_insurance_2015-01-07.xlsx"))
+## 專題一
+file<-dir("D:\\Code\\R")
+file<-file[grep("^hw|xlsx&",file)]
+HW<-read_excel(paste0("D:\\Code\\R\\",file[1]))
+
+for(i in 2:length(file)){
+  tmp<-read_excel(paste0("D:\\Code\\R\\",file[i]))
+  HW<-cbind(HW,tmp[-1])
+}
+## 專題二
+file<-dir("D:\\Code\\R")
+file<-file[grep("^quiz|xlsx&",file)]
+quiz<-read_excel(paste0("D:\\Code\\R\\",file[1]))
+for (i in colnames(quiz)[-1]){
+  quiz[[i]][which(quiz[[i]]=="NA")]<-0
+}
+mid_exem <- grade["mid_exem"]
+quiz<-cbind(quiz, mid_exem)
+R2 <- numeric(0)
+
+## 專題三
+semester_grade<-grade["semester_grade"]
+quiz1<-grade["quiz1"]
+quiz1[["quiz1"]][which(quiz1[["quiz1"]]>990)]<-0
+```
+
+# 第一題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第二題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第三題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第四題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第六題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第七題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第八題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第九題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 小專題進度一_作業繳交情況百分比
+
+```{r fig.width=7.3, fig.height=5}
+
+hw_persent<-data.frame("ID"=HW$ID,
+           "persent"= ((HW$hw_ch1+ HW$hw_ch5+ HW$hw_ch9)/3)*100)
+hw_persent
+```
+
+# 小專題進度二_小考1(每題)與期中原始成績
+
+```{r fig.width=7.3, fig.height=5}
+
+for (i in colnames(quiz)[-c(1,12)]){
+  quizML <- as.formula(paste(colnames(quiz)[12],"~",i))
+  R2 <- c(R2,summary(lm(quizML, data=quiz))$r.squared)
+}
+data.frame("model"=c(paste(colnames(quiz)[12],"~", colnames(quiz)[-c(1,12)])),
+           "R2"=R2)
+```
+
+# 小專題進度三_期末成績~作業繳交與小考1成績
+
+```{r fig.width=7.3, fig.height=5}
+data<-cbind(hw_persent,quiz1,semester_grade)
+ML <- as.formula(paste(colnames(data)[4],"~",paste(colnames(data)[-c(1,4)],collapse = "+")))
+m1<-lm(ML, data=data)
+summary(m1)
+
+```
+
+

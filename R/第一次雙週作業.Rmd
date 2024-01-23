@@ -1,0 +1,213 @@
+---
+title: "第一次雙週作業的解答"
+author: "王泓文"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(MASS)
+library(readxl)
+library(corrplot)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 注意事項：
+1. 每一個人的題目都是十題加三題，請自行前往班級的「LMS」網站讀取題目。至於每一個人是面對哪三個解釋變數，就交給上天決定，完全隨機。
+1. 請把「第三行」的作者名字換掉，當然是換成你的全名。
+1. 答題需要的套件，請加在第12行跟第14行之間的「R chunk」。
+1. <span style="color: blue;">這一點非常重要：請自行把真正的題目加進來，比如說，第一題是「xyz」就把「(第一題)的解答」變成「(第一題)xyz的解答」或是其他更寫意的句子，雖然這不算分數，但是沒出現真正題目，一定沒分數。</span>
+1. 第五題跟第十題是「解讀題」，要求各位解釋(小作文)每一題答案的數字，這是「R程式碼」之外的另一個重點，一定要持續練習、一定要上網搜救(求救)一般人是如何解讀的？
+1. <span style="color: red;">因應今年疫情期間，為了督促各位即時、及時完成「分組期末比賽」，特別設計「比賽進度題」，請根據個人、個人學習生態圈，以及師長的要求，自行設計相關題目**三題**並解答。每一次的相關進度「實踐度」將列入「個人期末比賽書面報告」的評分項目，師長個人相信這絕對是關鍵項目。</span>
+1. 期限內上傳作業成果時，務必把「作業樣板檔案名稱」從「HWoo.Rmd」改成「xxx的第oo次雙週作業.Rmd」或是「xxx的第oo次單週作業.Rmd」(上傳時才改成中文名稱的「.Rmd」)。其中「xxx」是你的大名，當然如果你是「單名」，那就是「xx的第oo次雙週作業.Rmd」或是「xx的第oo次單週作業.Rmd」。
+1. 請按時繳交每一次師長安排的課外作業，萬不得已不開啟補交頁面。請不要試圖寄信給師長或是助教，希望能夠補交作業，一律拒收。
+
+# 準備數據
+
+```{r fig.width=7.3, fig.height=5}
+#練習
+data(Boston)
+boston <- Boston
+zn <- boston[,"zn"]
+chas <- boston[,"chas"]
+indus <- boston[,"indus"]
+medv <- boston[,"medv"]
+# 專題數據
+question <- read_excel(paste0("D:\\Code\\R\\Q1_insurance_2014-09-24.xlsx"))
+grade <- read_excel(paste0("D:\\Code\\R\\grade_insurance_2015-01-07.xlsx"))
+```
+
+# 第一題的解答-zn的摘要統計量與特徵值
+
+```{r fig.width=7.3, fig.height=5}
+max(zn)
+min(zn)
+mean(zn)
+median(zn)
+var(zn)
+sd(zn)
+sqrt(sum((zn-mean(zn))^2)/(NROW(zn)-1))
+sum(abs(zn-median(zn)))/(NROW(zn))
+quantile(zn, 1 / 4) 
+quantile(zn, 3 / 4) 
+summary(zn)
+```
+
+# 第二題的解答-indus的摘要統計量與特徵值
+
+```{r fig.width=7.3, fig.height=5}
+max(indus)
+min(indus)
+mean(indus)
+median(indus)
+var(indus)
+sd(indus)
+sqrt(sum((indus-mean(indus))^2)/(NROW(indus)-1))
+sum(abs(indus-median(indus)))/(NROW(indus))
+quantile(indus, 1 / 4) 
+quantile(indus, 3 / 4) 
+summary(indus)
+```
+
+# 第三題的解答-chas的摘要統計量與特徵值
+
+```{r fig.width=7.3, fig.height=5}
+max(chas)
+min(chas)
+mean(chas)
+median(chas)
+var(chas)
+sd(chas)
+sqrt(sum((chas-mean(chas))^2)/(NROW(chas)-1))
+sum(abs(chas-median(chas)))/(NROW(chas))
+quantile(chas, 1 / 4) 
+quantile(chas, 3 / 4) 
+summary(chas)
+```
+
+# 第四題的解答-medv的摘要統計量與特徵值
+
+```{r fig.width=7.3, fig.height=5}
+max(medv)
+min(medv)
+mean(medv)
+median(medv)
+var(medv)
+sd(medv)
+sqrt(sum((medv-mean(medv))^2)/(NROW(medv)-1))
+sum(abs(medv-median(medv)))/(NROW(medv))
+quantile(medv, 1 / 4) 
+quantile(medv, 3 / 4) 
+summary(medv)
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+# zn的Q3為12.5代表有75%的土地住宅用地比例小於12.5
+# indus的Q3為18.1代表有75%的土地非商業區比例小於18.1
+# chas的Q3為0代表只有極少數的河邊宅
+# medv 中位數為21.20 -> 50%土地的房價中位數要21.2千美元
+#      最少要5千美元，平均22.53千美元
+
+```
+
+# 第六題的解答-zn與medv的相關係數與散佈圖
+
+```{r fig.width=7.3, fig.height=5}
+plot(zn,medv)
+cor(zn,medv)
+```
+
+# 第七題的解答-indus與medv的相關係數與散佈圖
+
+```{r fig.width=7.3, fig.height=5}
+plot(indus,medv)
+cor(indus,medv)
+```
+
+# 第八題的解答-chas與medv的相關係數與散佈圖
+
+```{r fig.width=7.3, fig.height=5}
+plot(chas,medv)
+cor(chas,medv)
+```
+
+# 第九題的解答-zn,indus,chas與medv的相關係數矩陣與相關係數圖
+
+```{r fig.width=7.3, fig.height=5}
+v <- data.frame(zn = boston$zn,
+                indus = boston$indus,
+                chas = boston$chas,
+                medv = boston$medv,
+                row.names = NULL)
+cor(v[,1:4])
+#係數圖
+c <- round(cor(v), 2)
+corrplot(c)
+
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+# 就相關程度而言indus與medv的相關程度較高
+# 但相關係數為負代表indus愈高則medv越低
+```
+
+# 小專題進度一-學期成績和微積分成績的關係
+
+```{r fig.width=7.3, fig.height=5}
+score <- grade[["semester_grade"]]
+calculus <- question[["Q1V13"]]
+length(score)
+score<-score[-which(calculus=="NA")]
+calculus<-calculus[-which(calculus=="NA")]
+calculus<-as.numeric(calculus)
+length(calculus)
+cor(score,calculus)
+m1 <- lm(score~calculus)
+plot(calculus, score)
+abline(m1)
+summary(m1)
+```
+
+# 小專題進度二-學期成績和經濟學成績的關係
+
+```{r fig.width=7.3, fig.height=5}
+score <- grade[["semester_grade"]]
+economic <- question[["Q1V14"]]
+length(score)
+score<-score[-which(economic=="NA"| economic=="0")]
+economic<-economic[-which(economic=="NA"| economic=="0")]
+economic<-as.numeric(economic)
+length(economic)
+cor(score,economic)
+m2 <- lm(score~economic)
+plot(economic, score)
+abline(m2)
+summary(m2)
+```
+
+# 小專題進度三-學期成績和會計學成績的關係
+
+```{r fig.width=7.3, fig.height=5}
+score <- grade[["semester_grade"]]
+accounting <- question[["Q1V15"]]
+length(score)
+score<-score[-which(accounting=="NA"| accounting=="0")]
+accounting<-accounting[-which(accounting=="NA"| accounting=="0")]
+accounting<-as.numeric(accounting)
+length(accounting)
+cor(score,accounting)
+m3 <- lm(score~accounting)
+plot(accounting, score)
+abline(m3)
+summary(m3)
+```
+
+

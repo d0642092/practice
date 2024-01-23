@@ -1,0 +1,130 @@
+---
+title: "第四次雙週作業的解答"
+author: "王泓文"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 注意事項：
+1. 每一個人的題目都是十題加三題，請自行前往班級的「LMS」網站讀取題目。至於每一個人是面對哪三個解釋變數，就交給上天決定，完全隨機。
+1. 請把「第三行」的作者名字換掉，當然是換成你的全名。
+1. 答題需要的套件，請加在第12行跟第14行之間的「R chunk」。
+1. <span style="color: blue;">這一點非常重要：請自行把真正的題目加進來，比如說，第一題是「xyz」就把「(第一題)的解答」變成「(第一題)xyz的解答」或是其他更寫意的句子，雖然這不算分數，但是沒出現真正題目，一定沒分數。</span>
+1. 第五題跟第十題是「解讀題」，要求各位解釋(小作文)每一題答案的數字，這是「R程式碼」之外的另一個重點，一定要持續練習、一定要上網搜救(求救)一般人是如何解讀的？
+1. <span style="color: red;">因應今年疫情期間，為了督促各位即時、及時完成「分組期末比賽」，特別設計「比賽進度題」，請根據個人、個人學習生態圈，以及師長的要求，自行設計相關題目**三題**並解答。每一次的相關進度「實踐度」將列入「個人期末比賽書面報告」的評分項目，師長個人相信這絕對是關鍵項目。</span>
+1. 期限內上傳作業成果時，務必把「作業樣板檔案名稱」從「HWoo.Rmd」改成「xxx的第oo次雙週作業.Rmd」或是「xxx的第oo次單週作業.Rmd」(上傳時才改成中文名稱的「.Rmd」)。其中「xxx」是你的大名，當然如果你是「單名」，那就是「xx的第oo次雙週作業.Rmd」或是「xx的第oo次單週作業.Rmd」。
+1. 請按時繳交每一次師長安排的課外作業，萬不得已不開啟補交頁面。請不要試圖寄信給師長或是助教，希望能夠補交作業，一律拒收。
+
+# 準備數據
+
+```{r fig.width=7.3, fig.height=5}
+PWD <- "../Data/"
+EXCEL <- dir(PWD)
+FL_Q2<-EXCEL[grep("^Q2_insurance_|xlsx&",EXCEL)]
+RES_Q2<-read_excel(paste0(PWD,FL_Q2))
+```
+
+# 第一題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第二題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第三題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第四題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第六題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第七題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第八題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第九題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 小專題進度一 -- 認真上課程度(8,9)
+
+```{r fig.width=7.3, fig.height=5}
+DT_Serious <- as.data.frame(cbind(RES_Q2$Q2V8 , RES_Q2$Q2V9))
+names(DT_Serious)<-c("Q8","Q9")
+DT_Serious$Q9[which(DT_Serious$Q9=="NA")]<-0
+DT_Serious$Q8<-as.numeric(DT_Serious$Q8)
+DT_Serious$Q9<-as.numeric(DT_Serious$Q9)
+
+STE_Serious<-as.data.frame(cbind(RES_Q2$ID,rowSums(DT_Serious)/2))
+names(STE_Serious)<-c("ID","STE_Serious")
+```
+
+# 小專題進度二 -- 不認真上課(2,4,6)
+
+```{r fig.width=7.3, fig.height=5}
+DT_notSerious <- as.data.frame(cbind(RES_Q2$Q2V2 , RES_Q2$Q2V4, RES_Q2$Q2V6))
+names(DT_notSerious)<-c("Q2","Q4","Q6")
+DT_notSerious$Q2<-as.numeric(DT_notSerious$Q2)
+DT_notSerious$Q4<-as.numeric(DT_notSerious$Q4)
+DT_notSerious$Q6<-as.numeric(DT_notSerious$Q6)
+
+STE_notSerious<-as.data.frame(cbind(RES_Q2$ID,rowSums(DT_notSerious)/3))
+names(STE_notSerious)<-c("ID","STE_notSerious")
+```
+
+# 小專題進度三 -- 擁有的書籍狀態(新買 影印 二手 沒有)
+
+```{r fig.width=7.3, fig.height=5}
+DT_Book <- as.data.frame(cbind(RES_Q2$Q2V12_1, RES_Q2$Q2V12_2, RES_Q2$Q2V12_3, RES_Q2$Q2V12_4))
+STE_Book<-as.data.frame(cbind(RES_Q2$ID,colSums(t(DT_Book)* c(8,4,2,1))))
+names(STE_Book)<-c("ID","STE_Book")
+```
+
+

@@ -1,0 +1,150 @@
+---
+title: "第三次雙週作業的解答"
+author: "王泓文"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    fig_caption: yes
+    toc: yes
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 注意事項：
+1. 每一個人的題目都是十題加三題，請自行前往班級的「LMS」網站讀取題目。至於每一個人是面對哪三個解釋變數，就交給上天決定，完全隨機。
+1. 請把「第三行」的作者名字換掉，當然是換成你的全名。
+1. 答題需要的套件，請加在第12行跟第14行之間的「R chunk」。
+1. <span style="color: blue;">這一點非常重要：請自行把真正的題目加進來，比如說，第一題是「xyz」就把「(第一題)的解答」變成「(第一題)xyz的解答」或是其他更寫意的句子，雖然這不算分數，但是沒出現真正題目，一定沒分數。</span>
+1. 第五題跟第十題是「解讀題」，要求各位解釋(小作文)每一題答案的數字，這是「R程式碼」之外的另一個重點，一定要持續練習、一定要上網搜救(求救)一般人是如何解讀的？
+1. <span style="color: red;">因應今年疫情期間，為了督促各位即時、及時完成「分組期末比賽」，特別設計「比賽進度題」，請根據個人、個人學習生態圈，以及師長的要求，自行設計相關題目**三題**並解答。每一次的相關進度「實踐度」將列入「個人期末比賽書面報告」的評分項目，師長個人相信這絕對是關鍵項目。</span>
+1. 期限內上傳作業成果時，務必把「作業樣板檔案名稱」從「HWoo.Rmd」改成「xxx的第oo次雙週作業.Rmd」或是「xxx的第oo次單週作業.Rmd」(上傳時才改成中文名稱的「.Rmd」)。其中「xxx」是你的大名，當然如果你是「單名」，那就是「xx的第oo次雙週作業.Rmd」或是「xx的第oo次單週作業.Rmd」。
+1. 請按時繳交每一次師長安排的課外作業，萬不得已不開啟補交頁面。請不要試圖寄信給師長或是助教，希望能夠補交作業，一律拒收。
+
+# 準備數據
+
+```{r fig.width=7.3, fig.height=5}
+PWD <- "../Data/"
+EXCEL <- dir(PWD)
+FL_attend<-EXCEL[grep("^insurance_|xlsx&",EXCEL)]
+FL_quiz<-EXCEL[grep("^quiz|xlsx&",EXCEL)]
+```
+
+# 第一題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第二題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第三題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第四題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第六題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第七題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第八題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 第九題的解答
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 解讀以上四題答案的意義、我感知這個數字的強度是？
+
+```{r fig.width=7.3, fig.height=5}
+1+1
+```
+
+# 小專題進度一 -- 實習課出席率
+
+```{r fig.width=7.3, fig.height=5}
+DT_experiment <- read_excel(paste0(PWD ,FL_attend[1]))[c(1,5)]
+for (file_name in FL_attend[-1]){
+  tmp <- read_excel(paste0(PWD ,file_name))[c(1,5)]
+  tmp[[2]][which(tmp[[2]]>=2)]<-0
+  DT_experiment <- merge(DT_experiment, tmp,by = "ID")
+  rm(tmp)
+}
+
+PER_experiment <- data.frame("ID"=DT_experiment$ID, "PER_EX"=0)
+for (i in 1:dim(DT_experiment)[1]){
+  PER_experiment[i,2] <- mean(as.numeric(DT_experiment[i,-1]))
+}
+rm(file_name, i)
+
+```
+
+# 小專題進度二 -- 正課每日出席狀況
+
+```{r fig.width=7.3, fig.height=5}
+
+for (file_name in FL_attend){
+  if(file_name==FL_attend[1]){
+    STE_attend<-data.frame("ID"=read_excel(paste0(PWD ,file_name))[1])
+  }
+  tmp <- read_excel(paste0(PWD ,file_name))[c(2,3,4)]
+  tmp[which(tmp[c(1)]>2)%%dim(tmp)[1],c(1)]<-0
+  tmp[which(tmp[c(2)]>2)%%dim(tmp)[1],c(2)]<-0
+  tmp[which(tmp[c(3)]>2)%%dim(tmp)[1],c(3)]<-0
+  STE_attend<-cbind(STE_attend, colSums(t(tmp)* c(4,2,1)))
+  rm(tmp)
+}
+
+names(STE_attend)<-c("ID",paste0("v",c(1:8)))
+rm(file_name)
+```
+
+
+# 小專題進度三 -- 小考滿分題數
+
+```{r fig.width=7.3, fig.height=5}
+RES_quiz<-read_excel(paste0(PWD ,FL_quiz[1]))
+
+for( CN in colnames(RES_quiz)[-1]){
+  RES_quiz[[CN]]<-as.numeric(gsub("NA",0,RES_quiz[[CN]]))
+}
+
+CON_quiz1 <- data.frame("ID"=RES_quiz$ID)
+CON_quiz1$CON_quiz1 <- rowSums(RES_quiz[1:dim(RES_quiz)[1],]==10)
+rm(CN)
+```
+
+

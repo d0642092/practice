@@ -1,0 +1,142 @@
+---
+---
+
+```{r setup, include=FALSE}
+library(readxl)
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo=FALSE}
+PWD <- "../../FMsources/data/insurance/"
+excel <- dir("../../FMsources/data/insurance/")
+```
+
+## 特徵值
+### 問卷
+```{r pressure, echo=FALSE}
+FL_Ques<-excel[grep("^Q._|xlsx&",excel)]
+DT_ques<-merge(read_excel(paste0(PWD,FL_Ques[1])),read_excel(paste0(PWD,FL_Ques[2])),by="ID")
+col<-c("ID","Q1V9","Q1V6_3","Q2V2","Q2V6","Q2V8","Q2V13","Q2V14","Q2V15","Q2V16")
+col_f<-c("ID","Q2V2","Q2V4","Q2V6","Q2V8","Q2V9")
+DT_forcus<-DT_ques[col_f]
+for( colname in colnames(DT_forcus)[-1]){
+  DT_forcus[[colname]]<-as.numeric(gsub("NA",NA,DT_forcus[[colname]]))
+  DT_forcus[[colname]][is.na(DT_forcus[[colname]])] <-  as.integer(mean(DT_forcus[[colname]], na.rm = T))
+}
+DT_ques<-DT_ques[col]
+for( colname in colnames(DT_ques)[-1]){
+  DT_ques[[colname]]<-as.numeric(gsub("NA",NA,DT_ques[[colname]]))
+  DT_ques[[colname]][is.na(DT_ques[[colname]])] <- as.integer(mean(DT_ques[[colname]], na.rm = T))
+}
+rm(col,colname,FL_Ques)
+```
+### 上課專注度
+```{r DT_notSerious, echo=FALSE}
+NS<-(DT_forcus$Q2V2+DT_forcus$Q2V4+DT_forcus$Q2V6)/3
+S <-(DT_forcus$Q2V8+DT_forcus$Q2V9)/2
+DT_forcus<-data.frame(ID=DT_forcus$ID,S/(NS+S))
+names(DT_forcus)<-c("ID","forcus")
+rm(NS,S,col_f)
+```
+### 出席
+```{r pressure, echo=FALSE}
+FL_attend<-excel[grep("^insurance_|xlsx&",excel)]
+for (file_name in FL_attend){
+  FR <- read_excel(paste0(PWD ,file_name))
+  for( colname in colnames(FR)[-1]){
+    FR[[colname]]<-as.numeric(gsub("NA",NA,FR[[colname]]))
+    FR[[colname]][is.na(FR[[colname]])] <-  as.integer(0)
+  }
+  FR[which(FR[c(2)]>=2)%%dim(FR)[1],c(2)]<-0
+  FR[which(FR[c(3)]>=2)%%dim(FR)[1],c(3)]<-0
+  FR[which(FR[c(4)]>=2)%%dim(FR)[1],c(4)]<-0
+  FR[which(FR[c(5)]>=2)%%dim(FR)[1], c(5)]<-0
+  if(file_name==FL_attend[1]){
+    DT_allAttend<-data.frame("ID"=FR$ID)
+    DT_experiment<-data.frame("ID"=FR$ID)
+  }
+  DT_allAttend<-merge(DT_allAttend,FR, by="ID")
+  DT_experiment<-merge(DT_experiment,FR[c(1,5)], by="ID")
+  rm(FR,file_name)
+}
+#總出席率(含實習)
+  PER_allAttend <- data.frame("ID"=DT_allAttend$ID,"allAttend"=0)
+#實習出席率
+  PER_experiment <- data.frame("ID"=DT_experiment$ID,"PER_EX"=0)
+for (i in 1:dim(DT_allAttend)[1]){
+  PER_allAttend$allAttend[i]<-mean(as.numeric(DT_allAttend[i,-1]))
+  PER_experiment$PER_EX[i]<-mean(as.numeric(DT_experiment[i,-1]))
+}
+rm(DT_allAttend,DT_experiment,i,FL_attend)
+```
+### 小考
+```{r pressure, echo=FALSE}
+FL_quiz<-excel[grep("^quiz|xlsx&",excel)]
+quiz<-read_excel(paste0(PWD,FL_quiz[1]))
+for(file_name in FL_quiz[-c(1,4)]){
+  quiz <-merge(quiz,read_excel(paste0(PWD,file_name)),by="ID")
+}
+for( colname in colnames(quiz)[-1]){
+  quiz[[colname]]<-as.numeric(gsub("NA",NA,quiz[[colname]]))
+  quiz[[colname]][is.na(quiz[[colname]])] <-  as.integer(mean(quiz[[colname]], na.rm = T))
+}
+rm(file_name, colname, FL_quiz)
+```
+
+### 作業
+```{r pressure, echo=FALSE}
+FL_HW <-excel[grep("^hw|xlsx&",excel)]
+DT_HW <- read_excel(paste0(PWD ,FL_HW[1]))
+for (file_name in FL_HW[-1]){
+  DT_HW <-merge(DT_HW,read_excel(paste0(PWD,file_name)),by="ID")
+}
+for( colname in colnames(DT_HW)[-1]){
+  DT_HW[[colname]]<-as.numeric(gsub("NA",NA,DT_HW[[colname]]))
+  DT_HW[[colname]][is.na(DT_HW[[colname]])] <-  as.integer(0)
+}
+rm(file_name,colname,FL_HW)
+```
+### 資料合併(PCA)
+```{r pressure, echo=FALSE}
+FL_grade <- excel[grep("^grade", excel)]
+grade <- read_excel(paste0(PWD, FL_grade))
+target<-grade$semester_grade
+rm(FL_grade,grade)
+data<-merge(quiz,DT_forcus,by="ID")
+data<-merge(data,DT_HW[-9],by="ID")
+data<-merge(data,PER_allAttend,by="ID")
+data<-merge(data,PER_experiment,by="ID")
+data<-merge(data,DT_ques,by="ID")
+colnames(data)
+data[,-1]<-apply(data[,-1], 2, function(x) (x-min(x))/(max(x)-min(x)))
+data.pca<-prcomp(data[,-1],scale=TRUE)
+df <- data.frame(ID = data$ID,
+                 pc1 =summary(data.pca)$x[,"PC1"],
+                 pc2 = summary(data.pca)$x[,"PC2"]
+                )
+df<-cbind(df,grade=target)
+```
+### 資料切割
+```{r pressure, echo=FALSE}
+TEST_ID <- c("D0025361", "D0036251", "D0062728", "D0079729", "D0079937",
+             "D0229859", "D0229982", "D0230097", "D0230201", "D0230317",
+             "D0230470", "D0269263", "D0275878", "D0275953", "D0276007",
+             "D0391809", "D9979704")
+test_df <- data.frame()
+train_df <- df
+
+for(i in seq_along(TEST_ID)){
+  p1 <- df[which(df$ID == TEST_ID[i]),]
+  train_df <- train_df[-which(train_df$ID == TEST_ID[i]),]
+  test_df <- rbind(test_df, p1)
+}
+pc_model <- lm(grade ~ pc1 + pc2, data = train_df)
+pcr_pred <- predict(pc_model, test_df)
+print(summary(pc_model))
+print(mean((as.numeric(test_df$grade) - pcr_pred )^2))
+y<-data.frame(target=test_df$grade,pred=pcr_pred)
+#View(y)
+pcr_pred<-as.vector(pcr_pred)
+saveRDS(object = pcr_pred, file = "蔡承儒_王泓文_陳致維_余淳芳.rds")
+
+```

@@ -1,6 +1,6 @@
 ---
 title: "第三次雙週作業的解答"
-author: "王泓文"
+author: ""
 date: "`r Sys.Date()`"
 output: 
   html_document: 

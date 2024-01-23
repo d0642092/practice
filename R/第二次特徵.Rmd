@@ -137,6 +137,6 @@ print(mean((as.numeric(test_df$grade) - pcr_pred )^2))
 y<-data.frame(target=test_df$grade,pred=pcr_pred)
 #View(y)
 pcr_pred<-as.vector(pcr_pred)
-saveRDS(object = pcr_pred, file = "蔡承儒_王泓文_陳致維_余淳芳.rds")
+saveRDS(object = pcr_pred, file = "person.rds")
 
 ```
